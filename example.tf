@@ -2,13 +2,23 @@ provider "aws" {
   region = "${var.region}"
 }
 
-module "consul" {
-  source = "hashicorp/consul/aws"
-
-  aws_region  = "${var.region}" # should match provider region
-  num_servers = "3"
+resource "aws_instance" "example" {
+  ami           = "${lookup(var.amis, var.region)}"
+  instance_type = "t2.micro"
 }
 
-output "consul_server_asg_name" {
-  value = "${module.consul.asg_name_servers}"
+resource "aws_eip" "ip" {
+  instance = "${aws_instance.example.id}"
+}
+
+output "ip" {
+  value = "${aws_eip.ip.public_ip}"
+}
+
+terraform {
+  backend "consul" {
+    address = "demo.consul.io"
+    path    = "getting-started-dfgdfgretw490oq3"
+    lock    = false
+  }
 }
