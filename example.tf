@@ -11,14 +11,18 @@ resource "aws_eip" "ip" {
   instance = "${aws_instance.example.id}"
 }
 
-output "ip" {
-  value = "${aws_eip.ip.public_ip}"
+resource "aws_s3_bucket" "bucket" {
+  bucket = "tf-example-bucket"
+
+  versioning {
+    enabled = true
+  }
 }
 
 terraform {
-  backend "consul" {
-    address = "demo.consul.io"
-    path    = "getting-started-dfgdfgretw490oq3"
-    lock    = false
+  backend "s3" {
+    bucket = "tf-example-bucket"
+    key    = "tfstate"
+    region = "eu-west-2"
   }
 }
